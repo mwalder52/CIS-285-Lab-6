@@ -1,0 +1,66 @@
+@startuml
+left to right direction
+package "Presentation adapters" {
+  component "Browser UI\nfull-product path" as Browser
+  component "Swing UI\nMVP-only path" as Swing
+  component "Mobile UI\ncourse scope pending" as Mobile
+}
+
+package "Application layer" {
+  component "Account and access use cases" as AccountUC
+  component "Group and membership use cases" as GroupUC
+  component "Expense and approval use cases" as ExpenseUC
+  component "Payment and correction use cases" as PaymentUC
+  component "Balance and report queries" as QueryUC
+}
+
+package "Domain" {
+  component "Expense allocation\nBigDecimal" as Allocation
+  component "Approval policy\nand state transitions" as Approval
+  component "Financial journal\nand balance rules" as Journal
+  component "Authorization rules" as Authz
+}
+
+package "Infrastructure ports / adapters\nproposals, providers unselected" {
+  interface "Account / group repository" as Repo1
+  interface "Transactional journal store" as Repo2
+  component "Receipt adapter" as Receipt
+  component "Notification outbox\ndispatcher" as Outbox
+  component "Email / notification\nprovider adapter" as Provider
+}
+
+Browser --> AccountUC
+Browser --> GroupUC
+Browser --> ExpenseUC
+Browser --> PaymentUC
+Browser --> QueryUC
+Swing --> AccountUC
+Swing --> GroupUC
+Swing --> ExpenseUC
+Swing --> PaymentUC
+Swing --> QueryUC
+Mobile --> AccountUC
+Mobile --> GroupUC
+Mobile --> ExpenseUC
+Mobile --> PaymentUC
+Mobile --> QueryUC
+
+AccountUC --> Authz
+GroupUC --> Authz
+ExpenseUC --> Authz
+ExpenseUC --> Allocation
+ExpenseUC --> Approval
+PaymentUC --> Authz
+PaymentUC --> Approval
+PaymentUC --> Journal
+QueryUC --> Authz
+QueryUC --> Journal
+ExpenseUC --> Repo1
+GroupUC --> Repo1
+AccountUC --> Repo1
+ExpenseUC --> Repo2
+PaymentUC --> Repo2
+PaymentUC --> Receipt
+ExpenseUC --> Outbox
+Outbox --> Provider
+@enduml

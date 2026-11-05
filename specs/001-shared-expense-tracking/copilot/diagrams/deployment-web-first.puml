@@ -1,0 +1,24 @@
+@startuml SplitSmartWebFirstDeployment
+left to right direction
+node "User device" {
+  artifact "Supported web browser" as Browser
+}
+node "Application environment\n(proposed; topology TBD)" {
+  artifact "Web presentation" as Web
+  artifact "Java 21 application/domain runtime" as App
+}
+database "Transactional persistence\n(product TBD)" as DB
+cloud "Identity / email provider\n(unselected)" as Identity
+cloud "Notification channel\n(unselected)" as Notify
+cloud "Receipt object storage\n(proposal)" as Receipt
+Browser --> Web : HTTPS (proposal)
+Web --> App : authenticated application calls
+App --> DB : transactional records
+App --> Identity
+App --> Notify
+App --> Receipt
+note bottom of App
+  Web-first is the path aligned with NFR-001.
+  Actual runtime, deployment, and framework are not selected.
+end note
+@enduml

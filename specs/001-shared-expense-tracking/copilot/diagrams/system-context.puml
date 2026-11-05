@@ -1,0 +1,34 @@
+@startuml SplitSmartSystemContext
+left to right direction
+actor "Individual user" as User
+actor "Group owner / manager" as Manager
+actor "Expense reviewer" as Reviewer
+rectangle "SplitSmart" {
+  component "Authorized application\nand domain services" as Core
+  component "Browser client\n(full product path)" as Web
+  component "Swing client\n(MVP path only)" as Swing
+}
+cloud "Identity / email\n(provider unselected)" as Identity
+cloud "Notification delivery\n(channel unselected)" as Notify
+cloud "Receipt storage\n(proposal)" as Receipts
+database "Durable financial\nrecords (technology TBD)" as Store
+User --> Web
+Manager --> Web
+Reviewer --> Web
+User --> Swing : MVP only
+Manager --> Swing : MVP only
+Reviewer --> Swing : MVP only
+Web --> Core
+Swing --> Core
+Core --> Identity
+Core --> Notify
+Core --> Receipts
+Core --> Store
+note bottom of Swing
+  Desktop-only; not NFR-001 compliant.
+end note
+note bottom of Core
+  Full-product scope and Swing MVP
+  are separate; platform decision open.
+end note
+@enduml

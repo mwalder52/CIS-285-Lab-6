@@ -1,0 +1,33 @@
+@startuml
+left to right direction
+actor "Individual user" as User
+actor "Group owner / manager" as Manager
+actor "Expense reviewer" as Reviewer
+
+rectangle "SplitSmart (full product; proposed)" {
+  component "Browser client\nNFR-001" as WebClient
+  component "Swing MVP client\nprototype only" as SwingClient
+  component "Application use cases\nand domain rules" as App
+}
+
+cloud "Email delivery\nprovider not selected" as Email
+cloud "Expense notification\nchannel not selected" as Notify
+cloud "Private receipt storage\nprovider not selected" as Receipt
+
+User --> WebClient
+User --> SwingClient
+Manager --> WebClient
+Manager --> SwingClient
+Reviewer --> WebClient
+Reviewer --> SwingClient
+WebClient --> App
+SwingClient --> App
+App --> Email : verification / reset
+App --> Notify : authorized expense notice
+App --> Receipt : private receipt bytes
+
+note bottom of SwingClient
+Swing-only delivery does not satisfy NFR-001.
+Platform decision requires stakeholder approval.
+end note
+@enduml

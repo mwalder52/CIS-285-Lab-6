@@ -1,0 +1,115 @@
+@startuml SplitSmartDomainModel
+hide methods
+skinparam classAttributeIconSize 0
+class UserAccount {
+  accountId
+  verifiedEmail
+  status
+}
+class Group {
+  groupId
+  ownerId
+  currencyCode
+  currencyScale
+}
+class Membership {
+  membershipId
+  role
+  status
+}
+class ApprovalPolicy {
+  policyId
+  version
+  reviewLevels
+}
+class Expense {
+  expenseId
+  payerId
+  amount: BigDecimal
+  expenseDate: LocalDate
+  splitMethod
+  status
+}
+class Allocation {
+  allocationId
+  participantId
+  share: BigDecimal
+  percentage: BigDecimal [optional]
+}
+class ApprovalDecision {
+  decisionId
+  reviewerId
+  level
+  decision
+}
+class Notification {
+  notificationId
+  recipientId
+  deliveryStatus
+}
+class Payment {
+  paymentId
+  payerId
+  payeeId
+  amount: BigDecimal
+  paymentDate: LocalDate
+}
+class Correction {
+  correctionId
+  originalRecordId
+  amount: BigDecimal
+  status
+}
+class FinancialPosting {
+  postingId
+  sourceRecordId
+  debtorId
+  creditorId
+  amount: BigDecimal
+}
+class Balance <<derived>> {
+  debtorId
+  creditorId
+  amount: BigDecimal
+}
+class ReportRequest <<transient>> {
+  startDate: LocalDate
+  endDate: LocalDate
+}
+UserAccount "1" -- "0..*" Membership
+Group "1" -- "1..*" Membership
+Group "1" -- "1" UserAccount : owner
+Group "1" -- "0..*" Expense
+Group "1" -- "0..*" Payment
+Group "1" -- "1..*" ApprovalPolicy
+ApprovalPolicy "1" -- "0..*" Expense : captured version
+Expense "1" -- "1" UserAccount : payer
+Expense "1" *-- "1..*" Allocation
+Allocation "*" --> "1" UserAccount : participant
+Expense "1" -- "0..*" ApprovalDecision
+Expense "1" -- "0..*" Notification
+Payment "*" --> "1" UserAccount : payer
+Payment "*" --> "1" UserAccount : payee
+Correction "*" --> "0..1" Expense : expense adjustment
+Correction "*" --> "0..1" Payment : payment reversal
+Expense "1" -- "0..*" FinancialPosting : only when approved
+Payment "1" -- "1..*" FinancialPosting
+Correction "1" -- "0..*" FinancialPosting : only when approved
+FinancialPosting ..> Balance : derives
+ReportRequest ..> Expense
+ReportRequest ..> Payment
+ReportRequest ..> Balance
+note right of Expense
+  Payer may be a participant.
+  Payer's own share creates no debt.
+  Finalized source is immutable.
+end note
+note bottom of Balance
+  Projection only; rebuild from
+  approved immutable financial records.
+end note
+note bottom of Correction
+  Exactly one original Expense or Payment
+  is referenced by each correction.
+end note
+@enduml

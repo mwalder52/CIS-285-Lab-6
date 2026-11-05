@@ -1,0 +1,108 @@
+@startuml
+hide methods
+skinparam classAttributeIconSize 0
+
+class UserAccount {
+  accountId
+  verifiedEmail
+  credentialHash
+  status
+}
+class Group {
+  groupId
+  ownerId
+  currencyCode
+  currencyScale
+  approvalPolicyId
+}
+class Membership {
+  role
+  status
+  joinedAt
+  endedAt
+}
+class Expense {
+  expenseId
+  submitterId
+  payerId
+  amount: BigDecimal
+  expenseDate
+  splitMethod
+  status
+}
+class Allocation {
+  participantId
+  percentage: BigDecimal
+  amount: BigDecimal
+}
+class ApprovalDecision {
+  level
+  reviewerId
+  decision
+  decidedAt
+}
+class ReceiptReference {
+  privateObjectRef
+  mediaType
+  size
+}
+class JournalEntry {
+  sourceId
+  kind
+  debtorId
+  creditorId
+  amount: BigDecimal
+  createdAt
+}
+class Payment {
+  payerId
+  payeeId
+  amount: BigDecimal
+  paymentDate
+}
+class Correction {
+  originalId
+  kind
+  amount: BigDecimal
+  status
+}
+class Notification {
+  recipientId
+  sourceId
+  deliveryState
+}
+class ReportRequest {
+  startDate
+  endDate
+  filters
+}
+
+UserAccount "1" -- "0..*" Membership
+Group "1" -- "1..*" Membership
+UserAccount "1" <-- "1" Group : owner
+Group "1" -- "0..*" Expense
+UserAccount "1" <-- "0..*" Expense : submitter
+UserAccount "1" <-- "0..*" Expense : payer
+Expense "1" *-- "1..*" Allocation
+UserAccount "1" <-- "0..*" Allocation : participant
+Expense "1" *-- "0..*" ApprovalDecision
+Expense "1" *-- "0..*" ReceiptReference
+Expense "1" --> "0..*" JournalEntry : approved posting
+Payment "1" --> "1..*" JournalEntry : payment posting
+Correction "1" --> "1" JournalEntry : compensating posting
+Expense "1" <-- "0..*" Correction : corrected expense
+Payment "1" <-- "0..*" Correction : corrected payment
+Group "1" -- "0..*" Notification
+UserAccount "1" <-- "0..*" Notification : recipient
+UserAccount "1" -- "0..*" ReportRequest : requester
+
+note right of JournalEntry
+Append-only source of financial truth.
+Balances are derived and reconciled.
+end note
+note bottom of Allocation
+Largest fractional remainder;
+ties by stable account ID.
+All shares sum to expense amount.
+end note
+@enduml

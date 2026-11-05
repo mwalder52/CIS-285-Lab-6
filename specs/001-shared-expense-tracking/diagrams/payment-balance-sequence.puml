@@ -1,0 +1,37 @@
+@startuml
+actor Member
+participant "Payment / balance use case" as UC
+participant "Authorization" as Auth
+database "Transactional store\n(product not selected)" as Store
+participant "Journal" as Journal
+
+Member -> UC : request pairwise balance
+UC -> Auth : check current group membership
+Auth --> UC : authorized
+UC -> Journal : query net pairwise entries
+Journal --> UC : derived balance
+UC --> Member : debtor / creditor / amount
+
+Member -> UC : record partial or full payment
+UC -> Auth : authorize payer and payee
+Auth --> UC : authorized
+UC -> Store : begin; re-read current debt
+alt amount exceeds outstanding debt
+  Store --> UC : reject; no writes
+  UC --> Member : overpayment validation error
+else valid payment
+  Store -> Journal : append immutable payment offset\nand payment record atomically
+  Journal --> Store : committed once
+  Store --> UC : updated balance
+  UC --> Member : payment ID and new balance
+end
+
+Member -> UC : request correction (owner/manager only)
+UC -> Auth : check role and correction policy
+Auth --> UC : authorized
+UC -> Store : save pending correction; original unchanged
+note over Store,Journal
+Only approved correction appends a compensating entry.
+Payment reversal is bounded by unreversed original amount.
+end note
+@enduml

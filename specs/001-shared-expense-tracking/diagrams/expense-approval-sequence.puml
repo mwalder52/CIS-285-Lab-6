@@ -1,0 +1,37 @@
+@startuml
+actor Submitter
+actor Reviewer
+actor "Current recipient" as Recipient
+participant "Expense use case" as UC
+participant "Authorization" as Auth
+participant "Allocation domain service" as Alloc
+database "Transactional store\n(product not selected)" as Store
+participant "Outbox dispatcher" as Outbox
+participant "Journal" as Journal
+
+Submitter -> UC : submit expense
+UC -> Auth : check submitter, payer, participants
+Auth --> UC : authorized / current members
+UC -> Alloc : validate and calculate shares
+Alloc --> UC : exact allocations
+UC -> Store : save PENDING expense + allocations\n+ notification outbox records
+Store --> UC : committed
+UC --> Submitter : pending expense ID
+
+Reviewer -> UC : decide at approval level
+UC -> Auth : reviewer eligible? not submitter?
+Auth --> UC : allowed
+UC -> Store : conditional decision on PENDING subject
+alt rejection at any required level
+  Store -> Store : mark REJECTED; no journal posting
+else not all levels complete
+  Store -> Store : record decision; remain PENDING
+else final required approval
+  Store -> Journal : atomically finalize and append entries\nunique source posting key
+  Journal --> Store : posted once
+end
+Store --> UC : result or stale/duplicate conflict
+UC --> Reviewer : final state
+Outbox -> Store : read committed notification work
+Outbox --> Recipient : delivery status tracked; details reauthorized on read
+@enduml

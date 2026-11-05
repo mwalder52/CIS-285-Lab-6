@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+node "Path A: proposed Swing MVP\nnot full customer product" {
+  artifact "Java 21 Swing client" as SwingClient
+  node "Shared application service\nrequired for multi-user proposal" as SwingService {
+    artifact "Application + domain" as SwingDomain
+    database "Transactional persistence\nproduct not selected" as SwingStore
+  }
+  SwingClient --> SwingService
+}
+
+node "Path B: proposed full product\nplatform approval required" {
+  node "Client devices" {
+    artifact "Web browser client\nNFR-001" as Browser
+    artifact "Android client\ncourse scope pending" as Android
+    artifact "iOS client\ncourse scope pending" as IOS
+  }
+  node "Hosted application boundary\nJava 21 backend is a proposal" as WebService {
+    artifact "Application + domain" as WebDomain
+    database "Transactional persistence\nproduct not selected" as WebStore
+    artifact "Outbox dispatcher" as Dispatcher
+  }
+  Browser --> WebService
+  Android --> WebService
+  IOS --> WebService
+}
+
+cloud "Email / notification provider\nnot selected" as Delivery
+cloud "Private receipt storage\nnot selected" as ReceiptStore
+SwingDomain --> Delivery
+SwingDomain --> ReceiptStore
+WebDomain --> Delivery
+WebDomain --> ReceiptStore
+note bottom
+Paths are alternatives, not an approved combined deployment.
+Swing-only delivery does not satisfy the primary-web requirement.
+Mobile clients require course-owner confirmation.
+end note
+@enduml

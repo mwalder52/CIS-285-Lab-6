@@ -1,0 +1,32 @@
+@startuml SplitSmartExpenseApproval
+actor Submitter
+actor Reviewer
+participant "Expense Use Case" as UseCase
+participant "Membership / Allocation Domain" as Domain
+database "Transactional Store" as Store
+participant "Notification Port" as Notify
+Submitter -> UseCase : submit expense
+UseCase -> Domain : validate member, payer,\nparticipants, date and amount
+Domain --> UseCase : validated exact allocations
+UseCase -> Store : save PENDING expense,\npolicy snapshot, review levels,\nnotification intents
+Store --> UseCase : committed
+UseCase -> Notify : deliver eligible notifications
+note over Store
+  No balance posting while pending.
+  Delivery can retry; reads recheck authorization.
+end note
+Reviewer -> UseCase : decide(level, outcome)
+UseCase -> Store : verify pending state,\nreviewer eligibility and uniqueness
+Store --> UseCase : accepted decision
+alt Rejection at required level
+  UseCase -> Store : atomically set REJECTED
+  note right of Store : No financial posting.
+else All required levels approve
+  UseCase -> Store : atomically set APPROVED\nand insert unique postings
+  note right of Store : One source posting key; commit together.
+else More approvals remain
+  UseCase -> Store : persist decision only
+end
+Store --> UseCase : committed or conflict
+UseCase --> Reviewer : explicit result
+@enduml

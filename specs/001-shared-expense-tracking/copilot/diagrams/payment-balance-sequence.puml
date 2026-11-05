@@ -1,0 +1,29 @@
+@startuml SplitSmartPaymentBalance
+actor Member
+participant "Payment Use Case" as Payment
+participant "Authorization / Ledger Domain" as Domain
+database "Transactional Store" as Store
+participant "Balance Query" as Query
+Member -> Payment : record payment
+Payment -> Domain : authorize caller; validate date,\npositive amount and currency
+Payment -> Store : begin transaction
+Payment -> Store : read current pair obligation\nwith lock/version
+Store --> Payment : outstanding amount
+alt Payment exceeds current amount owed
+  Payment -> Store : rollback; write nothing
+  Payment --> Member : reject; history/balance unchanged
+else Amount is within current amount owed
+  Payment -> Store : insert immutable Payment\nand unique financial posting
+  Payment -> Store : commit
+  Payment --> Member : accepted
+end
+Member -> Query : request pairwise balance
+Query -> Domain : authorize current membership
+Query -> Store : derive from approved expense,\npayment and correction postings
+Store --> Query : source records
+Query --> Member : net debtor, creditor, amount
+note over Store
+  Concurrent payments revalidate against current state.
+  A projection may be cached, never authoritative.
+end note
+@enduml

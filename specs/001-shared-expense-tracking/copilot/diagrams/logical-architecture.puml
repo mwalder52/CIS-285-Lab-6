@@ -1,0 +1,74 @@
+@startuml SplitSmartLogicalArchitecture
+top to bottom direction
+package "Presentation adapters" {
+  [Browser UI\n(proposal)] as Browser
+  [Swing UI\n(MVP)] as Swing
+  [Mobile UI\n(scope unconfirmed)] as Mobile
+}
+package "Application use cases" {
+  [Identity & Groups] as Identity
+  [Expense & Allocation] as Expense
+  [Review & Corrections] as Review
+  [Payments & Balances] as Finance
+  [Notifications & Reports] as Read
+}
+package "Domain" {
+  [Accounts / Membership] as AccountModel
+  [Expense / Approval Policy] as ExpenseModel
+  [BigDecimal Allocation] as Allocation
+  [Immutable Ledger] as Ledger
+  [Authorization Rules] as Auth
+}
+package "Infrastructure adapters (technology TBD)" {
+  [Repositories / Transactions] as Repositories
+  [Identity / Email Port] as IdentityPort
+  [Notification Port] as NotificationPort
+  [Receipt Storage Port] as ReceiptPort
+}
+database "Persistent records" as DB
+cloud "External providers" as External
+Browser --> Identity
+Browser --> Expense
+Browser --> Review
+Browser --> Finance
+Browser --> Read
+Swing --> Identity
+Swing --> Expense
+Swing --> Review
+Swing --> Finance
+Swing --> Read
+Mobile ..> Identity : only if confirmed
+Mobile ..> Expense
+Mobile ..> Finance
+Identity --> AccountModel
+Identity --> Auth
+Expense --> ExpenseModel
+Expense --> Allocation
+Expense --> Auth
+Review --> ExpenseModel
+Review --> Ledger
+Review --> Auth
+Finance --> Ledger
+Finance --> Auth
+Read --> Ledger
+Read --> Auth
+Identity ..> Repositories
+Expense ..> Repositories
+Expense ..> ReceiptPort
+Review ..> Repositories
+Finance ..> Repositories
+Read ..> Repositories
+Identity ..> IdentityPort
+Read ..> NotificationPort
+Repositories --> DB
+IdentityPort --> External
+NotificationPort --> External
+ReceiptPort --> External
+note right of Ledger
+  Source financial records are immutable.
+  Balance views are derived/rebuildable.
+end note
+note bottom
+  Dependencies point inward; presentation contains no business calculations.
+end note
+@enduml

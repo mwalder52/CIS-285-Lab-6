@@ -1,0 +1,24 @@
+@startuml SplitSmartSwingMvpDeployment
+left to right direction
+node "User device" {
+  artifact "Java 21 Swing client\n(MVP only)" as Swing
+}
+node "Shared application environment\n(topology TBD)" {
+  artifact "Application / domain services" as App
+}
+database "Durable shared records\n(product TBD)" as DB
+cloud "Identity / email service\n(if selected)" as Identity
+cloud "In-app / external notification\n(delivery choice TBD)" as Notify
+Swing --> App : application interface\n(transport/topology TBD)
+App --> DB : transactional records
+App --> Identity
+App --> Notify
+note bottom of Swing
+  Swing desktop deployment is not a web experience
+  and does not satisfy NFR-001.
+end note
+note bottom of App
+  A local-only store does not by itself provide
+  shared cross-user group behavior.
+end note
+@enduml
