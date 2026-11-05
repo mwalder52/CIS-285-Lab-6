@@ -1,0 +1,15 @@
+@startuml
+title Authorized report generation
+start
+:Authenticate requester;
+:Validate inclusive date range (start <= end);
+:Resolve current group authorization;
+if (authorized?) then (yes)
+ :Filter canonical records by supported parameters;
+ :Aggregate and reconcile totals;
+ :Return authorized summary;
+else (no)
+ :Deny without disclosing records;
+endif
+stop
+@enduml

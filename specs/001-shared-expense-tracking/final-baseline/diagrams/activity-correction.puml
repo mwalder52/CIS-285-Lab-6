@@ -1,0 +1,15 @@
+@startuml
+title Submit and approve correction
+start
+:Authorize owner/manager;
+:Reference immutable original record;
+:Validate correction and unreversed amount;
+:Save pending correction;
+:Route through configured review;
+if (approved?) then (yes)
+ :Append compensating posting once;
+else (no)
+ :Keep original and balances unchanged;
+endif
+stop
+@enduml

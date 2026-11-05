@@ -1,0 +1,9 @@
+@startuml
+title Payment lifecycle
+[*] --> Validating
+Validating --> Rejected : invalid / overpayment
+Validating --> Recorded : accepted atomically
+Recorded --> Recorded : immutable; offset posted once
+Rejected --> [*]
+Recorded --> [*]
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+title Web-first full product deployment (proposal; technology TBD)
+left to right direction
+node "User device" { artifact "Supported browser" as Browser }
+node "Application environment (proposed)" {
+ artifact "Web adapter" as Web
+ artifact "Application + domain services" as App
+ artifact "Outbox dispatcher" as Dispatcher
+}
+database "Transactional persistence\nproduct TBD" as DB
+cloud "Identity/email provider TBD" as Identity
+cloud "Notification provider TBD" as Notify
+cloud "Private receipt storage TBD" as Receipt
+Browser --> Web
+Web --> App
+App --> DB
+App --> Identity
+Dispatcher --> DB
+Dispatcher --> Notify
+App --> Receipt
+note bottom: Web path aligns with NFR-001; actual deployment and products are unselected.
+@enduml

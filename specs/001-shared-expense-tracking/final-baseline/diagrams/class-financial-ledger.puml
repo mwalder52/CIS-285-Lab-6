@@ -1,0 +1,14 @@
+@startuml
+title Financial records and derived balances
+skinparam classAttributeIconSize 0
+class Expense
+class Payment { paymentId; amount: BigDecimal; date; immutable }
+class Correction { correctionId; kind; status; originalId }
+class JournalEntry { sourceId; postingKind; debtorId; creditorId; amount: BigDecimal; createdAt }
+class BalanceProjection <<derived>> { debtorId; creditorId; netAmount; journalSequence }
+Expense "1" --> "0..*" JournalEntry : approved posting
+Payment "1" --> "1..*" JournalEntry : offset
+Correction "1" --> "0..*" JournalEntry : approved compensation
+JournalEntry ..> BalanceProjection : rebuilds
+note bottom: Append-only postings; unique source/posting key; projection is never authoritative.
+@enduml

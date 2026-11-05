@@ -1,0 +1,10 @@
+@startuml
+title Approval workflow lifecycle
+[*] --> AwaitingDecision
+AwaitingDecision --> AwaitingDecision : approve, levels remain
+AwaitingDecision --> Approved : final required approval
+AwaitingDecision --> Rejected : any rejection
+Approved --> [*]
+Rejected --> [*]
+note right: Duplicate, late, ineligible, and self decisions are rejected.
+@enduml

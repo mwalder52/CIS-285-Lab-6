@@ -1,0 +1,18 @@
+@startuml
+title Payment and partial payment allocation
+actor Debtor
+participant PaymentUseCase
+participant Authorization
+database Transaction
+participant Journal
+Debtor -> PaymentUseCase: record amount/date
+PaymentUseCase -> Authorization: current group/pair access?
+PaymentUseCase -> Transaction: begin; re-read outstanding debt
+alt amount exceeds current debt
+ Transaction --> PaymentUseCase: reject; no writes
+else amount within debt
+ Transaction -> Journal: append payment + offset posting atomically
+ Journal --> Transaction: committed once
+end
+PaymentUseCase --> Debtor: result and updated balance
+@enduml

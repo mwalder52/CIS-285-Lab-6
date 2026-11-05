@@ -1,0 +1,16 @@
+@startuml
+title Approval policy versioning and notification delivery
+class ApprovalPolicyVersion { policyId; version; effectiveAt }
+class ApprovalLevel { levelNumber; eligibleReviewers }
+class ApprovalDecision { subjectId; level; reviewerId; outcome; decidedAt }
+class Expense { status; submitterId }
+class Notification { recipientId; sourceId; status }
+class OutboxMessage { messageId; attempts; nextAttempt; state }
+ApprovalPolicyVersion "1" *-- "1..*" ApprovalLevel
+Expense "*" --> "1" ApprovalPolicyVersion : snapshot reference
+Expense "1" *-- "0..*" ApprovalDecision
+ApprovalDecision --> ApprovalLevel
+OutboxMessage --> Notification
+note right of ApprovalDecision: Unique subject/reviewer/level; submitter cannot review.
+note bottom of OutboxMessage: Recheck current membership before dispatch and detail retrieval.
+@enduml

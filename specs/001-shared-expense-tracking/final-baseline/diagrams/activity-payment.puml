@@ -1,0 +1,13 @@
+@startuml
+title Record payment and update derived balance
+start
+:Authorize current group/pair;
+:Begin transaction and reread debt;
+if (positive, valid date, not over debt?) then (yes)
+ :Append immutable Payment and offset posting atomically;
+ :Rebuild/update derived balance projection;
+else (no)
+ :Rollback; report error with no history change;
+endif
+stop
+@enduml

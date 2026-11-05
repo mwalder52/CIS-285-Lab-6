@@ -1,0 +1,31 @@
+@startuml
+title SplitSmart logical components and dependency direction
+top to bottom direction
+package "Presentation adapters" { [Browser] as Browser; [Swing MVP] as Swing }
+package "Application use cases" { [Identity / Groups] as Groups; [Expenses / Approval] as Expenses; [Payments / Corrections] as Finance; [Balances / Reports] as Queries }
+package "Domain" { [Membership authorization] as Auth; [Money / Allocation] as Allocation; [Approval policy] as Policy; [Financial journal] as Journal }
+package "Infrastructure adapters (TBD)" { interface "Repository + transaction" as Repo; [Receipt adapter] as Receipt; [Outbox dispatcher] as Outbox; [Delivery provider] as Provider }
+Browser --> Groups
+Browser --> Expenses
+Browser --> Finance
+Browser --> Queries
+Swing --> Groups
+Swing --> Expenses
+Swing --> Finance
+Swing --> Queries
+Groups --> Auth
+Expenses --> Auth
+Expenses --> Allocation
+Expenses --> Policy
+Finance --> Journal
+Queries --> Auth
+Queries --> Journal
+Groups ..> Repo
+Expenses ..> Repo
+Finance ..> Repo
+Queries ..> Repo
+Expenses ..> Receipt
+Expenses ..> Outbox
+Outbox --> Provider
+note bottom: Dependencies point inward. Infrastructure implements ports; technology unselected.
+@enduml

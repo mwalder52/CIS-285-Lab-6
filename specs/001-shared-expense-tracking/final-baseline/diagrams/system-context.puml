@@ -1,0 +1,28 @@
+@startuml
+title SplitSmart system context and trust boundaries
+left to right direction
+actor Member
+actor Owner
+actor Reviewer
+rectangle "SplitSmart trust boundary" {
+ component "Browser adapter\n(full product path)" as Web
+ component "Swing adapter\n(MVP proposal)" as Swing
+ component "Application + domain" as Core
+}
+database "Persistent records\ntechnology TBD" as DB
+cloud "Email / identity\nprovider TBD" as IDP
+cloud "Notification channel\nTBD" as Notify
+cloud "Private receipt store\nproposal" as Receipt
+Member --> Web
+Owner --> Web
+Reviewer --> Web
+Member --> Swing
+Web --> Core
+Swing --> Core
+Core --> DB
+Core --> IDP
+Core --> Notify
+Core --> Receipt
+note right of Swing: Desktop-only; not NFR-001 compliant.
+note bottom of Core: Reauthorize membership at every data boundary.
+@enduml

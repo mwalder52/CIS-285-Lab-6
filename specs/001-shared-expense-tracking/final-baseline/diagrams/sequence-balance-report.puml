@@ -1,0 +1,19 @@
+@startuml
+title Authorized balance and report query
+actor Member
+participant QueryUseCase
+participant Authorization
+database Store
+participant Journal
+Member -> QueryUseCase: request balance/report dates
+QueryUseCase -> Authorization: current membership and scope?
+alt denied
+ QueryUseCase --> Member: non-disclosing denial
+else allowed
+ QueryUseCase -> Store: fetch authorized canonical records
+ Store -> Journal: derive pairwise net
+ Journal --> Store: projection/source totals
+ Store --> QueryUseCase: inclusive date result
+ QueryUseCase --> Member: authorized reconciled summary
+end
+@enduml

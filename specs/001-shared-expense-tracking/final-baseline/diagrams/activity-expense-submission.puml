@@ -1,0 +1,15 @@
+@startuml
+title Validate, allocate, and submit expense
+start
+:Authenticate submitter;
+:Check current group, payer, participants;
+if (valid members and nonempty participants?) then (yes)
+ :Validate positive amount, precision, date, method;
+ :Calculate exact deterministic shares;
+ :Persist PENDING expense and notice intents;
+ :Return pending ID; no posting;
+else (no)
+ :Reject without writes;
+endif
+stop
+@enduml

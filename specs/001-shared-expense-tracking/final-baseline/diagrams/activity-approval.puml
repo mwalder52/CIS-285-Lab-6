@@ -1,0 +1,21 @@
+@startuml
+title Route approval and decide
+start
+:Load pending subject and policy version;
+:Check reviewer eligibility and no self-review;
+if (decision allowed and unique?) then (yes)
+ :Persist decision;
+ if (rejected?) then (yes)
+  :Finalize rejected; no journal;
+ else (no)
+  if (all required levels approved?) then (yes)
+   :Atomically finalize and post once;
+  else (no)
+   :Remain pending;
+  endif
+ endif
+else (no)
+ :Reject as forbidden or conflict;
+endif
+stop
+@enduml

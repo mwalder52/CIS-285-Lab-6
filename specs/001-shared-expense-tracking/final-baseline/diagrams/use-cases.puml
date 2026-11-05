@@ -1,0 +1,29 @@
+@startuml
+title SplitSmart use cases (proposed full product)
+left to right direction
+actor User
+actor "Group owner / manager" as Manager
+actor Reviewer
+actor "Notification service" as Delivery
+rectangle SplitSmart {
+ usecase "Register / sign in" as U1
+ usecase "Manage group membership" as U2
+ usecase "Submit expense" as U3
+ usecase "Review expense" as U4
+ usecase "Record payment" as U5
+ usecase "Submit correction" as U6
+ usecase "View balance / report" as U7
+ usecase "Retrieve receipt" as U8
+ usecase "Dispatch notice" as U9
+}
+User -- U1
+User -- U3
+User -- U5
+User -- U7
+User -- U8
+Manager -- U2
+Manager -- U6
+Reviewer -- U4
+Delivery -- U9
+note bottom: All group data requires current authorization. Swing-only does not satisfy NFR-001.
+@enduml

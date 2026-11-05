@@ -1,0 +1,18 @@
+@startuml
+title Domain core classes
+skinparam classAttributeIconSize 0
+class UserAccount { accountId; verifiedEmail; credentialHash; status }
+class Group { groupId; ownerId; currencyCode; precision }
+class Membership { role; status; startAt; endAt }
+class Expense { expenseId; submitterId; payerId; total: BigDecimal; date; status }
+class ExpenseAllocation { participantId; percentage?; amount: BigDecimal }
+class ReceiptReference { privateObjectRef; mediaType; size }
+class Money { amount: BigDecimal; currencyCode; scale }
+UserAccount "1" -- "0..*" Membership
+Group "1" -- "1..*" Membership
+Group "1" -- "0..*" Expense
+Expense "1" *-- "1..*" ExpenseAllocation
+Expense "1" *-- "0..*" ReceiptReference
+Expense --> Money
+note right of Expense: Payer may be a participant. Own share nets to zero.
+@enduml

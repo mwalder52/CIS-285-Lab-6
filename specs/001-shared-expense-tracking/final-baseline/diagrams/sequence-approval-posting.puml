@@ -1,0 +1,21 @@
+@startuml
+title Multi-level approval and exactly-once posting
+actor Reviewer
+participant ApprovalUseCase
+participant Authorization
+database Transaction
+participant Journal
+Reviewer -> ApprovalUseCase: decide(level, outcome)
+ApprovalUseCase -> Authorization: eligible and not submitter?
+ApprovalUseCase -> Transaction: conditional unique decision
+alt rejected
+ Transaction -> Transaction: finalize REJECTED; no posting
+else approvals remain
+ Transaction -> Transaction: retain PENDING
+else all required levels approve
+ Transaction -> Journal: atomically finalize + unique source posting
+ Journal --> Transaction: one posting committed
+end
+Transaction --> ApprovalUseCase: result or conflict
+ApprovalUseCase --> Reviewer: status
+@enduml

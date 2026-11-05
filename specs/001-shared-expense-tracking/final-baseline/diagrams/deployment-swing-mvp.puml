@@ -1,0 +1,16 @@
+@startuml
+title Swing MVP deployment (proposal; not full customer product)
+left to right direction
+node "User computer" {
+ artifact "Java 21 Swing client\ncourse direction" as Swing
+}
+node "Shared service (topology TBD)" {
+ artifact "Application + domain" as App
+ database "Transactional records\nproduct TBD" as DB
+}
+Swing --> App
+App --> DB
+cloud "Identity / delivery / receipt adapters\nnot selected" as External
+App --> External
+note bottom of Swing: Desktop-only; does not satisfy NFR-001. Shared service needed for cross-user groups.
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+title Submit expense and calculate allocation
+actor Member
+participant ExpenseUseCase
+participant Authorization
+participant AllocationPolicy
+database Store
+Member -> ExpenseUseCase: submit fields
+ExpenseUseCase -> Authorization: current payer and participants?
+Authorization --> ExpenseUseCase: allow / deny
+ExpenseUseCase -> AllocationPolicy: validate and allocate exact minor units
+AllocationPolicy --> ExpenseUseCase: shares sum to total
+ExpenseUseCase -> Store: save PENDING + shares + policy version + notice intents
+Store --> ExpenseUseCase: committed ID
+ExpenseUseCase --> Member: pending result (no balance change)
+@enduml

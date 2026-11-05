@@ -1,0 +1,9 @@
+@startuml
+title Expense lifecycle
+[*] --> PENDING : submitted / no posting
+PENDING --> APPROVED : all required levels approve / post once
+PENDING --> REJECTED : any required rejection / no posting
+APPROVED --> [*]
+REJECTED --> [*]
+note right of APPROVED: Finalized source is immutable; correction is separate.
+@enduml

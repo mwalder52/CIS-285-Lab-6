@@ -1,0 +1,13 @@
+@startuml
+title Outbox message lifecycle
+[*] --> Pending
+Pending --> Dispatching : claim
+Dispatching --> Delivered : provider accepts
+Dispatching --> RetryWait : transient failure
+RetryWait --> Dispatching : retry
+Dispatching --> Suppressed : recipient no longer authorized
+RetryWait --> Failed : retry policy exhausted (policy TBD)
+Delivered --> [*]
+Suppressed --> [*]
+Failed --> [*]
+@enduml

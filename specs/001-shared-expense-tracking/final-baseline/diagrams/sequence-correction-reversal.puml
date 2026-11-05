@@ -1,0 +1,17 @@
+@startuml
+title Correction and reversal with approval
+actor OwnerOrManager
+actor Reviewer
+participant CorrectionUseCase
+participant Authorization
+database Store
+participant Journal
+OwnerOrManager -> CorrectionUseCase: submit correction referencing original
+CorrectionUseCase -> Authorization: owner/manager and same group?
+CorrectionUseCase -> Store: save pending; original unchanged
+Reviewer -> CorrectionUseCase: approve correction
+CorrectionUseCase -> Store: validate pending and unreversed amount
+Store -> Journal: append compensating entry once, atomically
+Journal --> Store: committed
+note right of Store: Reversal ≤ original unreversed amount. Rejected/pending has no financial effect.
+@enduml

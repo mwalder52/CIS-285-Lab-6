@@ -1,0 +1,18 @@
+@startuml
+title Outbox dispatch, retries, and privacy recheck
+participant ExpenseUseCase
+database Store
+participant Dispatcher
+participant Authorization
+participant Provider
+ExpenseUseCase -> Store: commit expense + recipient outbox rows atomically (required)
+Dispatcher -> Store: claim pending message
+Dispatcher -> Authorization: recipient still current member?
+alt authorized
+ Dispatcher -> Provider: deliver minimal notice (idempotency key)
+ Provider --> Dispatcher: delivered / retryable failure
+else removed or no longer authorized
+ Dispatcher -> Store: suppress details; mark suppressed
+end
+note over Authorization: Detail link rechecks membership on every read.
+@enduml

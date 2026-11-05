@@ -1,0 +1,9 @@
+@startuml
+title Correction and reversal lifecycle
+[*] --> PendingReview
+PendingReview --> Rejected : reviewer rejects
+PendingReview --> Approved : required approval / compensate once
+Approved --> [*]
+Rejected --> [*]
+note right of PendingReview: Original fact remains unchanged. Payment reversal bounded by unreversed amount.
+@enduml
