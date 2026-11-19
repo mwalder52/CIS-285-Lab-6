@@ -7,8 +7,108 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model EnvironmentCheck {
-  id        Int      @id @default(autoincrement())
-  message   String
+model User {
+  id                 String             @id
+  name               String
+  email              String             @unique
+  memberships        Membership[]
+  createdExpenses    Expense[]          @relation("ExpenseCreator")
+  paidExpenses       Expense[]          @relation("ExpensePayer")
+  allocations        ExpenseAllocation[]
+  paymentsMade       Payment[]          @relation("PaymentPayer")
+  paymentsReceived   Payment[]          @relation("PaymentPayee")
+  decisions          ExpenseDecision[]
+  notifications      Notification[]
+}
+
+model Group {
+  id           String         @id
+  name         String
+  currencyCode String         @default("USD")
+  memberships  Membership[]
+  expenses     Expense[]
+  payments     Payment[]
+  notifications Notification[]
+}
+
+model Membership {
+  id      String @id
+  groupId String
+  userId  String
+  role    String @default("MEMBER")
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+}
+
+model Expense {
+  id          String              @id
+  groupId     String
+  description String
+  amountCents Int
+  expenseDate DateTime
+  splitType   String
+  status      String              @default("PENDING")
+  createdAt   DateTime            @default(now())
+  group       Group               @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  creatorId   String
+  creator     User                @relation("ExpenseCreator", fields: [creatorId], references: [id])
+  payerId     String
+  payer       User                @relation("ExpensePayer", fields: [payerId], references: [id])
+  allocations ExpenseAllocation[]
+  decisions   ExpenseDecision[]
+  notifications Notification[]
+}
+
+model ExpenseAllocation {
+  id                    String  @id
+  expenseId             String
+  participantId          String
+  amountCents            Int
+  percentageBasisPoints  Int?
+  expense                Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  participant            User    @relation(fields: [participantId], references: [id])
+
+  @@unique([expenseId, participantId])
+}
+
+model ExpenseDecision {
+  id         String   @id
+  expenseId  String
+  reviewerId String
+  decision   String
+  comment    String?
+  createdAt  DateTime @default(now())
+  expense    Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  reviewer   User     @relation(fields: [reviewerId], references: [id])
+
+  @@unique([expenseId, reviewerId])
+}
+
+model Payment {
+  id          String   @id
+  groupId     String
+  payerId     String
+  payeeId     String
+  amountCents Int
+  paymentDate DateTime
+  note        String?
+  createdAt   DateTime @default(now())
+  group       Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payer       User     @relation("PaymentPayer", fields: [payerId], references: [id])
+  payee       User     @relation("PaymentPayee", fields: [payeeId], references: [id])
+}
+
+model Notification {
+  id        String   @id
+  groupId   String
+  expenseId String
+  userId    String
   createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, userId])
 }
